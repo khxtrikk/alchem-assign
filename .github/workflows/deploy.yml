@@ -1,0 +1,51 @@
+name: Build and Push to ECR
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  AWS_REGION: ap-south-1
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and Push Engine
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: iii-engine
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest -f docker/engine/Dockerfile .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+
+      - name: Build and Push Caller Worker
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: caller-worker
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest -f docker/caller-worker/Dockerfile .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+
+      - name: Build and Push Inference Worker
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: inference-worker
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest -f docker/inference-worker/Dockerfile .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest

@@ -1,0 +1,24 @@
+# Git
+.git
+.gitignore
+
+# Node
+node_modules/
+npm-debug.log
+bun.lock
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Environment
+.env
+iii.lock
+data/
+*.db
+
+# OS
+.DS_Store
+Thumbs.db
