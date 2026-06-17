@@ -1,8 +1,6 @@
 services:
   engine:
-    build:
-      context: .
-      dockerfile: docker/engine/Dockerfile
+    image: ${ECR_REGISTRY_URL}:latest
     restart: always
     volumes:
       - ./config.yaml:/app/config.yaml

@@ -22,12 +22,15 @@ aws ecr get-login-password --region ${AWS_REGION} | sudo docker login --username
 
 # 6. Run the specific container based on the VM type
 if [ "${NODE_TYPE}" == "engine" ]; then
-  sudo docker-compose -f docker-compose.iii.yml up -d
+  export ECR_REGISTRY_URL="${ECR_REGISTRY_URL}"
+  sudo -E docker-compose -f docker-compose.iii.yml up -d
 elif [ "${NODE_TYPE}" == "caller" ]; then
   # Inject the III_URL environment variable for the worker
   export III_URL="ws://${ENGINE_IP}:80/ws"
+  export ECR_REGISTRY_URL="${ECR_REGISTRY_URL}"
   sudo -E docker-compose -f docker-compose.caller.yml up -d
 elif [ "${NODE_TYPE}" == "inference" ]; then
   export III_URL="ws://${ENGINE_IP}:80/ws"
+  export ECR_REGISTRY_URL="${ECR_REGISTRY_URL}"
   sudo -E docker-compose -f docker-compose.inference.yml up -d
 fi

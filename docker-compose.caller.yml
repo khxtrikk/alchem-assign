@@ -1,8 +1,6 @@
 services:
   caller-worker:
-    build:
-      context: .
-      dockerfile: docker/caller-worker/Dockerfile
+    image: ${ECR_REGISTRY_URL}:latest
     restart: always
     environment:
       - III_URL=${III_URL}
