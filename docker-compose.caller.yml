@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  caller-worker:
+    build:
+      context: .
+      dockerfile: docker/caller-worker/Dockerfile
+    restart: always
+    environment:
+      - III_URL=${III_URL}

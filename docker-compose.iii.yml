@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  engine:
+    build:
+      context: .
+      dockerfile: docker/engine/Dockerfile
+    restart: always
+    volumes:
+      - ./config.yaml:/app/config.yaml
+      - ./.iii:/app/.iii
+      - ./data:/app/data
+    ports:
+      - "3111"
+      - "3112"
+      - "49134"
+
+  nginx:
+    image: nginx:alpine
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ./docker/engine/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - engine
