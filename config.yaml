@@ -1,5 +1,3 @@
-# iii engine configuration
-# Docs: https://iii.dev/docs/how-to/configure-engine
 workers:
   - name: iii-observability
     config:
@@ -28,7 +26,7 @@ workers:
   - name: iii-http
     config:
       port: 3111
-      host: 127.0.0.1
+      host: 0.0.0.0
       default_timeout: 30000
       concurrency_request_limit: 1024
       cors:
@@ -40,7 +38,3 @@ workers:
         - PUT
         - DELETE
         - OPTIONS
-  - name: inference-worker
-    worker_path: /Users/anuran/Alchemyst/hiring/may-2026/devops/quickstart/workers/inference-worker
-  - name: caller-worker
-    worker_path: /Users/anuran/Alchemyst/hiring/may-2026/devops/quickstart/workers/caller-worker
