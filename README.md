@@ -4,7 +4,7 @@ A production-ready, distributed AI worker mesh deployed securely on AWS using Te
 
 ## 📐 Architecture Diagrams
 
-![Architecture Diagram](architecture_diagram.md)  
+![Architecture Diagram](architecture.png)  
 
 ## 🔄 Request Flow Diagram
 
