@@ -4,6 +4,11 @@ on:
   push:
     branches:
       - main
+    paths-ignore:
+      - 'README.md'
+      - '*.png'
+      - '*.md'
+      - 'terraform/**'
 
 env:
   AWS_REGION: us-east-1
