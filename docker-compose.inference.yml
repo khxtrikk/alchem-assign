@@ -4,3 +4,5 @@ services:
     restart: always
     environment:
       - III_URL=${III_URL}
+    volumes:
+      - ./workers/inference-worker/inference_worker.py:/app/inference_worker.py

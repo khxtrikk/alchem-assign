@@ -22,6 +22,8 @@ aws ecr get-login-password --region ${AWS_REGION} | sudo docker login --username
 
 # 6. Run the specific container based on the VM type
 if [ "${NODE_TYPE}" == "engine" ]; then
+  mkdir -p ./data ./.iii
+  chmod 777 ./data ./.iii
   export ECR_REGISTRY_URL="${ECR_REGISTRY_URL}"
   sudo -E docker-compose -f docker-compose.iii.yml up -d
 elif [ "${NODE_TYPE}" == "caller" ]; then

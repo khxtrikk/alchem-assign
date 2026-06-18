@@ -62,5 +62,10 @@ resource "aws_instance" "vm_3_inference" {
     ENGINE_IP        = aws_instance.vm_1_engine.private_ip
   })
 
+  root_block_device {
+    volume_size = 30
+    volume_type = "gp3"
+  }
+
   tags = { Name = "inference-worker" }
 }

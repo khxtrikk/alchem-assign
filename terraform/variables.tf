@@ -7,5 +7,5 @@ variable "aws_region" {
 variable "github_repo_url" {
   description = "The public HTTPS URL of your GitHub repository so the VMs can download the config files"
   type        = string
-  default     = "https://github.com/YOUR_USERNAME/YOUR_REPO.git"
+  default     = "https://github.com/khxtrikk/alchem-assign.git"
 }
