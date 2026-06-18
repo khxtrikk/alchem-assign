@@ -13,11 +13,14 @@ provider "aws" {
 
 # ECR Repositories for your Docker Images
 resource "aws_ecr_repository" "engine" {
-  name = "iii-engine"
+  name         = "iii-engine"
+  force_delete = true
 }
 resource "aws_ecr_repository" "caller" {
-  name = "caller-worker"
+  name         = "caller-worker"
+  force_delete = true
 }
 resource "aws_ecr_repository" "inference" {
-  name = "inference-worker"
+  name         = "inference-worker"
+  force_delete = true
 }

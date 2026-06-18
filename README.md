@@ -5,9 +5,28 @@ A production-ready, distributed AI worker mesh deployed securely on AWS using Te
 ## 📐 Architecture Diagrams
 
 ![Architecture Diagram](architecture_diagram.md)  
-*(Add Architecture Diagram Here)*
 
-*(Add Request Flow Diagram Here)*
+## 🔄 Request Flow Diagram
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant NGINX
+    participant Engine (Broker)
+    participant Caller Worker (TypeScript)
+    participant Inference Worker (Python)
+
+    Client->>NGINX: POST /v1/chat/completions
+    NGINX->>Engine: Route HTTP Request
+    Engine->>Caller Worker: Trigger http::run_inference_over_http
+    Caller Worker->>Engine: RPC Trigger inference::run_inference
+    Engine->>Inference Worker: Forward RPC Trigger
+    Inference Worker-->>Engine: Stream Inference Result
+    Engine-->>Caller Worker: Return RPC Result
+    Caller Worker-->>Engine: Format Final JSON
+    Engine-->>NGINX: HTTP 200 OK
+    NGINX-->>Client: Final JSON Response
+```
 
 ## 🧩 Component Overview
 
@@ -58,34 +77,47 @@ curl -X POST http://<API_GATEWAY_IP>/api/v1/chat/completions \
 
 ## 🛠️ Deployment Prerequisites
 
-1. **AWS CLI** configured with your IAM credentials.
-2. **Terraform** installed.
-3. **GitHub Repository** containing this code.
-4. **GitHub Secrets**: You must add `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` to your repository's Action Secrets.
+To deploy this infrastructure from scratch, you need:
+1. An AWS Account.
+2. **AWS CLI** installed and configured (`aws configure`) with Administrator credentials.
+3. **Terraform** installed locally.
+4. **Docker** installed locally.
+5. A GitHub repository (if using CI/CD) with Action Secrets: `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`.
 
 ## 🚀 Setup & Reproduction Commands
 
-The deployment uses a GitOps methodology. Infrastructure is managed via Terraform, and Docker images are built via GitHub Actions.
+If you want to manually reproduce this deployment on your local machine and AWS environment:
 
-**1. Trigger the CI/CD Pipeline:**
-Push your code to the `main` branch to trigger GitHub Actions to build and push the Docker images to Amazon ECR.
+**1. Clone the Repository:**
 ```bash
-git push origin main
+git clone https://github.com/your-username/quickstart.git
+cd quickstart
 ```
 
-**2. Provision the AWS Infrastructure:**
+**2. Rebuild and Push the Docker Images:**
+You can either push to GitHub to let the `.github/workflows/deploy.yml` CI pipeline build the images automatically, or you can build them manually and push to ECR:
+```bash
+docker-compose -f docker-compose.caller.yml build
+docker-compose -f docker-compose.inference.yml build
+docker-compose -f docker-compose.iii.yml build
+# Tag and push to your AWS ECR Registry...
+```
+
+**3. Provision the AWS Infrastructure:**
+Navigate into the Terraform directory and apply the infrastructure:
 ```bash
 cd terraform
 terraform init
 terraform apply -auto-approve
 ```
 
-**3. Test the Infrastructure:**
-Wait exactly 4-5 minutes for the inference worker to download the model weights, then run the `curl` command using the IP from `terraform output api_gateway_public_ip`.
+**4. Test the Infrastructure:**
+Wait exactly 4-5 minutes for the EC2 instances to boot and the inference worker to download the model weights. Then, run the `curl` command using the public IP returned by `terraform output api_gateway_public_ip`.
 
-**4. Teardown (Crucial for Cost Savings):**
+**5. Teardown (Crucial for Cost Savings):**
 When finished, destroy all resources to prevent AWS charges.
 ```bash
+# Still inside the terraform/ directory:
 terraform destroy -auto-approve
 ```
 
@@ -118,13 +150,33 @@ During Terraform provisioning, the EC2 instances use `user_data.sh` scripts to a
 
 ```text
 .
-├── .github/workflows/   # CI/CD pipelines (Docker Build & Push)
-├── docker/              # Dockerfiles and NGINX configurations
-├── terraform/           # Infrastructure as Code (VPC, EC2, IAM)
-├── workers/             # Application Logic
-│   ├── caller-worker/   # TypeScript HTTP interceptor
-│   └── inference-worker/# Python PyTorch LLM executor
-└── docker-compose.*.yml # Compositions for running the workers
+├── .github/
+│   └── workflows/
+│       └── deploy.yml              # CI/CD pipeline (Docker Build & Push)
+├── docker/
+│   ├── engine/
+│   │   ├── Dockerfile              # Engine/Broker image
+│   │   └── nginx.conf              # API Gateway routing
+│   ├── caller-worker/
+│   │   └── Dockerfile              # Caller worker image
+│   └── inference-worker/
+│       └── Dockerfile              # Inference worker image
+├── terraform/
+│   ├── main.tf                     # Provider configs
+│   ├── vpc.tf                      # Network isolation & Subnets
+│   ├── ec2.tf                      # Virtual Machines & User Data
+│   ├── variables.tf                # Parameterized configs
+│   └── outputs.tf                  # IP addresses
+├── workers/
+│   ├── caller-worker/
+│   │   ├── package.json            # Node.js dependencies
+│   │   └── src/worker.ts           # TypeScript HTTP interceptor
+│   └── inference-worker/
+│       ├── requirements.txt        # Python dependencies
+│       └── inference_worker.py     # PyTorch LLM executor
+├── docker-compose.iii.yml
+├── docker-compose.caller.yml
+└── docker-compose.inference.yml    # Compositions for building & running workers locally
 ```
 
 ## 📈 Scaling to 100x Larger Models
